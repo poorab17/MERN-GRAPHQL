@@ -1,24 +1,56 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Route, Routes } from "react-router-dom"
+import Header from "./components/Header";
+import { ApolloProvider, ApolloClient, InMemoryCache } from "@apollo/client";
+import Home from "./pages/Home";
+import NotFound from "./pages/NotFound";
+import Project from "./pages/Project";
+
+
+const cache = new InMemoryCache({
+  typePolicies: {
+    Query: {
+      fields: {
+        clients: {
+          merge(existing, incoming) {
+            return incoming
+          }
+        },
+        projects: {
+          merge(existing, incoming) {
+            return incoming
+          }
+        },
+
+      }
+    }
+  }
+})
+
+
+const client = new ApolloClient({
+  uri: 'http://localhost:8000/graphql',
+  cache
+
+})
+
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <ApolloProvider client={client}>
+        <Router>
+          <Header />
+          <div className="container">
+            <Routes>
+              <Route path='/' element={<Home></Home>}></Route>
+              <Route path='/projects/:id' element={<Project></Project>}></Route>
+              <Route path='*' element={<NotFound></NotFound>}></Route>
+            </Routes>
+
+          </div>
+        </Router>
+      </ApolloProvider>
+    </>
   );
 }
 
